@@ -1,171 +1,117 @@
 class GitaApp {
-  constructor() {
-    this.dom = {
-      generateBtn: document.getElementById('generateBtn'),
-      verseCard: document.getElementById('verseCard'),
-      chapter: document.getElementById('chapter'),
-      verse: document.getElementById('verse'),
-      shloka: document.getElementById('shloka'),
-      transliteration: document.getElementById('transliteration'),
-      meaning: document.getElementById('meaning'),
-      explanationBtn: document.getElementById('explanationBtn'),
-      reportBtn: document.getElementById('reportBtn'),
-      reportModal: document.getElementById('reportModal'),
-      reportText: document.getElementById('reportText'),
-      submitReport: document.getElementById('submitReport'),
-      reportStatus: document.getElementById('reportStatus')
-    };
-    this.currentVerse = null;
-    this.init();
-  }
-
-  init() {
-    this.dom.generateBtn.addEventListener('click', () => this.loadVerse());
-    this.dom.explanationBtn.addEventListener('click', () => this.redirectExplanation());
-    this.dom.reportBtn.addEventListener('click', () => this.toggleModal(true));
-    document.querySelector('.modal-close').addEventListener('click', () => this.toggleModal(false));
-    document.querySelector('.modal-close-btn').addEventListener('click', () => this.toggleModal(false));
-    this.dom.submitReport.addEventListener('click', () => this.submitReport());
-    this.dom.reportModal.addEventListener('click', (e) => {
-      if (e.target === this.dom.reportModal) this.toggleModal(false);
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') this.toggleModal(false);
-    });
-    this.loadInitialVerse();
-  }
-
-  async loadInitialVerse() {
-    try {
-      await this.loadVerse();
-    } catch (error) {
-      console.error(error);
-      this.showError("Couldn't load verse. Please try again later.");
+    constructor() {
+        this.currentVerse = null;
+        this.initElements();
+        this.initEventListeners();
+        this.loadInitialVerse();
     }
-  }
 
-  async loadVerse() {
-    try {
-      this.dom.generateBtn.disabled = true;
-      this.dom.generateBtn.innerHTML = '<span class="loading"></span>';
-      const response = await fetch('/api/verse');
-      if (!response.ok) throw new Error(`API error: ${response.status}`);
-      const verse = await response.json();
-      this.currentVerse = verse;
-      this.dom.chapter.textContent = verse.chapter;
-      this.dom.verse.textContent = verse.verse;
-      this.dom.shloka.textContent = verse.shloka;
-      this.dom.transliteration.textContent = verse.transliteration;
-      this.dom.meaning.textContent = verse.meaning;
-      this.dom.verseCard.classList.add('active');
-      this.dom.generateBtn.disabled = false;
-      this.dom.generateBtn.textContent = '🕉️ Generate Verse';
-    } catch (error) {
-      console.error(error);
-      this.dom.generateBtn.disabled = false;
-      this.dom.generateBtn.textContent = '🕉️ Try Again';
-      this.showError("Couldn't load verse. Please try again.");
+    initElements() {
+        this.elements = {
+            newVerseBtn: document.getElementById('new-verse'),
+            explainBtn: document.getElementById('explain'),
+            reportBtn: document.getElementById('reportBtn'),
+            modal: document.getElementById('reportModal'),
+            reportText: document.getElementById('reportText'),
+            submitReport: document.getElementById('submitReport'),
+            status: document.getElementById('reportStatus'),
+            chapter: document.getElementById('chapter'),
+            verse: document.getElementById('verse'),
+            shloka: document.getElementById('shloka'),
+            transliteration: document.getElementById('transliteration'),
+            meaning: document.getElementById('meaning')
+        };
     }
-  }
 
-  /**
-   * Check a URL's availability using the /check_url endpoint.
-   * @param {string} url - The URL to verify.
-   * @returns {Promise<boolean>}
-   */
-  async checkUrl(url) {
-    try {
-      const res = await fetch(`/check_url?url=${encodeURIComponent(url)}`);
-      const data = await res.json();
-      return data.ok;
-    } catch (error) {
-      console.error("URL check error:", error);
-      return false;
+    initEventListeners() {
+        this.elements.newVerseBtn.addEventListener('click', () => this.loadVerse());
+        this.elements.explainBtn.addEventListener('click', () => this.openExplanation());
+        this.elements.reportBtn.addEventListener('click', () => this.toggleModal(true));
+        document.getElementById('closeModal').addEventListener('click', () => this.toggleModal(false));
+        this.elements.submitReport.addEventListener('click', () => this.handleReport());
     }
-  }
 
-  /**
-   * Redirect to an external explanation page.
-   * Primary: Vedabase.io; Fallback: Bhagavad-Gita.org.
-   */
-  async redirectExplanation() {
-    if (!this.currentVerse) {
-      alert("Please generate a verse first.");
-      return;
+    async loadInitialVerse() {
+        await this.loadVerse();
     }
-    const { chapter, verse } = this.currentVerse;
-    const primaryUrl = `https://vedabase.io/en/library/bg/${chapter}/${verse}/`;
-    const fallbackUrl = `https://www.bhagavad-gita.org/gita/verse.php?verse=${chapter}.${verse}`;
 
-    if (await this.checkUrl(primaryUrl)) {
-      window.location.href = primaryUrl;
-    } else if (await this.checkUrl(fallbackUrl)) {
-      window.location.href = fallbackUrl;
-    } else {
-      alert("Deeper explanation resource is currently unavailable.");
+    async loadVerse() {
+        try {
+            const response = await fetch('/api/verse');
+            const verse = await response.json();
+            this.currentVerse = verse;
+            this.updateDisplay(verse);
+        } catch (error) {
+            console.error('Error loading verse:', error);
+        }
     }
-  }
 
-  showError(message) {
-    const errorEl = document.createElement('div');
-    errorEl.className = 'error-message';
-    errorEl.textContent = message;
-    errorEl.style.backgroundColor = '#ffebee';
-    errorEl.style.color = '#c62828';
-    errorEl.style.padding = '1rem';
-    errorEl.style.borderRadius = '4px';
-    errorEl.style.margin = '1rem 0';
-    errorEl.style.textAlign = 'center';
-    const container = document.querySelector('.container');
-    container.insertBefore(errorEl, this.dom.verseCard);
-    setTimeout(() => errorEl.remove(), 5000);
-  }
+    updateDisplay(verse) {
+        this.elements.chapter.textContent = verse.chapter;
+        this.elements.verse.textContent = verse.verse;
+        this.elements.shloka.textContent = verse.shloka;
+        this.elements.transliteration.textContent = verse.transliteration;
+        this.elements.meaning.textContent = verse.meaning;
+    }
 
-  toggleModal(show) {
-    if (show) {
-      this.dom.reportModal.classList.add('active');
-      this.dom.reportText.focus();
-    } else {
-      this.dom.reportModal.classList.remove('active');
-      this.dom.reportStatus.textContent = '';
-      this.dom.reportStatus.className = '';
-    }
-  }
+    openExplanation() {
+        if (!this.currentVerse) return;
 
-  async submitReport() {
-    const message = this.dom.reportText.value.trim();
-    if (!message) {
-      this.dom.reportStatus.textContent = 'Please enter a message.';
-      this.dom.reportStatus.className = 'error';
-      return;
+        const { chapter, verse } = this.currentVerse;
+        const urls = [
+            `https://vedabase.io/en/library/bg/${chapter}/${verse}/`,
+            `https://www.holy-bhagavad-gita.org/chapter/${chapter}/verse/${verse}`
+        ];
+
+        // Try to open primary URL, fallback to secondary
+        const newWindow = window.open(urls[0], '_blank');
+        if (!newWindow || newWindow.closed) {
+            window.open(urls[1], '_blank');
+        }
     }
-    try {
-      this.dom.submitReport.disabled = true;
-      this.dom.reportStatus.textContent = 'Submitting...';
-      this.dom.reportStatus.className = '';
-      const response = await fetch('/report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message,
-          verseInfo: this.currentVerse ? `Chapter ${this.currentVerse.chapter}, Verse ${this.currentVerse.verse}` : 'No verse displayed'
-        })
-      });
-      if (!response.ok) throw new Error(`Server error: ${response.status}`);
-      this.dom.reportStatus.textContent = 'Report submitted successfully!';
-      this.dom.reportStatus.className = 'success';
-      this.dom.reportText.value = '';
-      setTimeout(() => {
-        this.toggleModal(false);
-        this.dom.submitReport.disabled = false;
-      }, 2000);
-    } catch (error) {
-      console.error(error);
-      this.dom.reportStatus.textContent = 'Failed to submit report. Please try again.';
-      this.dom.reportStatus.className = 'error';
-      this.dom.submitReport.disabled = false;
+
+    toggleModal(show) {
+        this.elements.modal.style.display = show ? 'flex' : 'none';
+        if (!show) this.elements.reportText.value = '';
     }
-  }
+
+    async handleReport() {
+        const message = this.elements.reportText.value.trim();
+        if (!message) {
+            this.showStatus('Please enter a message', 'error');
+            return;
+        }
+
+        const reportData = {
+            message,
+            chapter: this.currentVerse?.chapter,
+            verse: this.currentVerse?.verse
+        };
+
+        try {
+            const response = await fetch('/report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(reportData)
+            });
+
+            if (response.ok) {
+                this.showStatus('Report submitted successfully', 'success');
+                setTimeout(() => this.toggleModal(false), 1500);
+            } else {
+                throw new Error('Server error');
+            }
+        } catch (error) {
+            this.showStatus('Failed to submit report', 'error');
+            console.error('Report error:', error);
+        }
+    }
+
+    showStatus(message, type) {
+        this.elements.status.textContent = message;
+        this.elements.status.className = type;
+    }
 }
 
+// Initialize app when DOM loads
 document.addEventListener('DOMContentLoaded', () => new GitaApp());

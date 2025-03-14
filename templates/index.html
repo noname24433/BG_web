@@ -1,55 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Daily wisdom from the Bhagavad Gita - Get a random verse with translation and meaning">
-  <title>Bhagavad Gita Wisdom</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600&display=swap">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bhagavad Gita Wisdom</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header class="header">
-    <h1>भगवद्गीता</h1>
-    <p>Daily Wisdom Generator</p>
-  </header>
-  <main class="container">
-    <button id="generateBtn" class="btn">🕉️ Generate Verse</button>
-    <article id="verseCard" class="card">
-      <div class="meta">
-        <span>Chapter <span id="chapter"></span></span>
-        <span>Verse <span id="verse"></span></span>
-      </div>
-      <p id="shloka" class="sanskrit"></p>
-      <p id="transliteration"></p>
-      <p id="meaning"></p>
-      <div class="actions">
-        <!-- Single explanation button -->
-        <button id="explanationBtn" class="btn secondary">Deeper Explanation</button>
-      </div>
-      <!-- Disclaimer note -->
-      <p class="disclaimer">Note: The translation provided may differ from other sources.</p>
-    </article>
-    <!-- Report Modal -->
-    <div id="reportModal" class="modal">
-      <div class="modal-content">
-        <span class="modal-close">&times;</span>
-        <h3>Report an Issue</h3>
-        <p>If you find any errors with the verse or its translation, please describe the issue below:</p>
-        <textarea id="reportText" placeholder="Describe the issue..." maxlength="500"></textarea>
-        <div class="modal-buttons">
-          <button id="submitReport" class="btn">Submit</button>
-          <button class="btn secondary modal-close-btn">Cancel</button>
+    <div class="container">
+        <header>
+            <h1>भगवद्गीता</h1>
+            <p>Daily Wisdom</p>
+        </header>
+
+        <div class="card">
+            <div class="verse-meta">
+                <span>Chapter <span id="chapter">-</span></span>
+                <span>Verse <span id="verse">-</span></span>
+            </div>
+            <div class="shloka" id="shloka"></div>
+            <div class="transliteration" id="transliteration"></div>
+            <div class="meaning" id="meaning"></div>
         </div>
-        <p id="reportStatus"></p>
-      </div>
+
+        <div class="controls">
+            <button id="new-verse" class="btn">Get New Verse</button>
+            <button id="explain" class="btn secondary">Deeper Explanation</button>
+        </div>
+
+        <div class="modal" id="reportModal">
+            <div class="modal-content">
+                <h3>Report Issue</h3>
+                <textarea id="reportText" placeholder="Describe the issue..."></textarea>
+                <div class="modal-actions">
+                    <button id="submitReport" class="btn">Submit</button>
+                    <button class="btn secondary" id="closeModal">Cancel</button>
+                </div>
+                <div id="reportStatus"></div>
+            </div>
+        </div>
+        <button id="reportBtn" class="btn floating">Report Issue</button>
     </div>
-    <!-- Report Button (fixed at bottom right) -->
-    <button id="reportBtn" class="btn floating-btn">⚠️ Report</button>
-  </main>
-  <footer class="footer">
-    <p>Developed with ❤️ for spiritual seekers</p>
-  </footer>
-  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
